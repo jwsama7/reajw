@@ -31,3 +31,16 @@ it("versions fingerprints through the worker schema and rejects v1", () => {
     false,
   );
 });
+
+it("retains endpoint candidate interpretation through the worker schema", () => {
+  const facts = analyzeJavaScriptStaticSource(
+    'form.get("shared"); fetch("shared");',
+  );
+  expect(facts.endpoints).toContainEqual(
+    expect.objectContaining({ value: "shared", interpretation: "candidate" }),
+  );
+  const parsed = javaScriptWorkerStaticAnalysisSchema.parse(
+    JSON.parse(JSON.stringify(facts)) as unknown,
+  );
+  expect(parsed.endpoints).toEqual(facts.endpoints);
+});

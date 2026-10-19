@@ -328,6 +328,7 @@ export const javaScriptWorkerStaticAnalysisSchema = z
         kind: z.enum(["route", "network"]),
         value: z.string(),
         mechanism: z.string(),
+        interpretation: z.literal("candidate").optional(),
       }),
     ),
     storage: z.array(
@@ -390,7 +391,13 @@ export const javaScriptWorkerStaticAnalysisSchema = z
   })
   .transform((analysis) => ({
     ...analysis,
-    endpoints: analysis.endpoints.map(withRuntime),
+    endpoints: analysis.endpoints.map((value) => {
+      const { interpretation, ...rest } = withRuntime(value);
+      return {
+        ...rest,
+        ...(interpretation === undefined ? {} : { interpretation }),
+      };
+    }),
     storage: analysis.storage.map(withRuntime),
     role_paths: analysis.role_paths.map(withRuntime),
     electron: {
